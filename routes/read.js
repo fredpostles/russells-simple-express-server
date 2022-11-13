@@ -3,7 +3,13 @@ const { getUser } = require("../mysql/queries");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const results = await req.asyncMySQL(getUser(req.headers.token));
+  const { token } = req.headers;
+
+  const query = getUser();
+
+  const params = [token];
+
+  const results = await req.asyncMySQL(query, params);
 
   if (results.length === 0) {
     res.send({ status: 0, error: "User not found" });

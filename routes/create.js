@@ -1,7 +1,6 @@
 const express = require("express");
 const { createUser } = require("../mysql/queries");
 const router = express.Router();
-const { getUniqueId } = require("../utils");
 const sha256 = require("sha256");
 
 router.post("/", async (req, res) => {
@@ -11,7 +10,11 @@ router.post("/", async (req, res) => {
   if (name && email && password) {
     password = sha256(process.env.SALT + password);
 
-    const result = await req.asyncMySQL(createUser(name, email, password));
+    const query = createUser();
+
+    const params = [name, email, password];
+
+    const result = await req.asyncMySQL(query, params);
 
     if (result.affectedRows === 1) {
       res.send({ status: 1 });

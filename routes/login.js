@@ -1,5 +1,4 @@
 const express = require("express");
-const { simpsons } = require("../data/simpsons");
 const { checkCreds, addToken } = require("../mysql/queries");
 const { getUniqueId } = require("../utils");
 const router = express.Router();
@@ -11,10 +10,13 @@ router.post("/", async (req, res) => {
   if (!email || !password) {
     res.send({ status: 0, error: "Invalid input data" });
   }
-
   password = sha256(process.env.SALT + password);
 
-  const results = await req.asyncMySQL(checkCreds(email, password));
+  const query = checkCreds();
+
+  const params = [email, password];
+
+  const results = await req.asyncMySQL(query, params);
 
   //if creds do not match
   if (results.length === 0) {
@@ -24,7 +26,11 @@ router.post("/", async (req, res) => {
 
   const token = getUniqueId(64);
 
-  await req.asyncMySQL(addToken(results[0].id, token));
+  const query2 = addToken();
+
+  const params2 = [results[0].id, token];
+
+  await req.asyncMySQL(query2, params2);
 
   res.send({ status: 1, token });
 });

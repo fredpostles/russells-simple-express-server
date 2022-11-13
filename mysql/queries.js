@@ -1,37 +1,58 @@
 const queries = {
-  createUser: (name, email, password) => {
+  createUser: () => {
     return `INSERT IGNORE users 
                 (name, email, password)
                      VALUES
-                        ("${name}", "${email}", "${password}");`;
+                        (?, ?, ?);`;
   },
 
-  checkCreds: (email, password) => {
-    return `SELECT id
-                FROM users
-                    WHERE 
-                        email = "${email}"
+  checkCreds: () => {
+    return `SELECT id FROM users WHERE 
+                        email = ?
                             AND 
-                                password = "${password}";`;
+                                password = ?;`;
   },
 
-  addToken: (user_id, token) => {
+  addToken: () => {
     return `INSERT INTO logins
                     (user_id, token)
                             VALUES
-                                (${user_id}, "${token}");`;
+                                (?, ?);`;
   },
 
-  removeToken: (token) => {
+  removeToken: () => {
     return `DELETE FROM logins
-                WHERE token = "${token}";`;
+                WHERE token = ?;`;
   },
 
-  getUser: (token) => {
+  getUser: () => {
     return `SELECT name, email, users.entry_date FROM users
               JOIN logins
                 ON users.id = logins.user_id
-                  WHERE token = "${token}";`;
+                  WHERE token = ?;`;
+  },
+
+  deleteUser: () => {
+    return `DELETE users FROM users
+              JOIN logins
+                ON users.id = logins.user_id
+                  WHERE token = ?;`;
+  },
+
+  updateUser: (column) => {
+    return `UPDATE users
+              JOIN logins
+                ON users.id = logins.user_id
+                  SET ${column} = ?
+                  WHERE token = ?;`;
+  },
+
+  checkToken: () => {
+    return `SELECT users.id
+              FROM users
+                JOIN logins
+                  ON users.id = logins.user_id
+                    WHERE token = ?;`;
   },
 };
 
